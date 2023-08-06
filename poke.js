@@ -1,59 +1,47 @@
-const pokemonListElement = document.getElementById("pokemonList");
-const searchInput = document.getElementById("searchInput");
+/*call of the pokemon*/
+const pokemoncontainer = document.querySelector(".pokemon-container");
 
-// Fetch the JSON data from your own server
-fetch("https://storage.googleapis.com/campus-cvs/00000000000-images-lectures/pokemons.json")
-  .then((response) => response.json())
-  .then((data) => displayPokemonList(data));
-
-
-// Fetch the JSON data
-
-function displayPokemonList(pokemonData) {
-    pokemonListElement.innerHTML = "";
-
-    pokemonData.forEach(pokemon => {
-        const card = document.createElement("div");
-        card.classList.add("col-md-3", "mb-3");
-
-        card.innerHTML = `
-            <div class="card" data-bs-toggle="modal" data-bs-target="#pokemonModal" data-pokemon-id="${pokemon.id}">
-                <div class="card-body">
-                    <h5 class="card-title">${pokemon.name}</h5>
-                    <p class="card-text">${pokemon.type}</p>
-                </div>
-            </div>
-        `;
-
-        pokemonListElement.appendChild(card);
-    });
-
-    // Add event listener to each card to display modal with more details
-    const cards = document.querySelectorAll(".card");
-    cards.forEach(card => {
-        card.addEventListener("click", () => {
-            const pokemonId = card.getAttribute("data-pokemon-id");
-            displayPokemonModal(pokemonData[pokemonId - 1]);
-        });
+function fetchpokemon(id) {
+  fetch(`https://pokeapi.co/api/v2/pokemon/${id}/`)
+    .then((res) => res.json())
+    .then((data) => {
+        createpokemon(data);
     });
 }
 
-function displayPokemonModal(pokemon) {
-    const modalBody = document.getElementById("modalBody");
-    modalBody.innerHTML = `
-        <h5>Name: ${pokemon.name}</h5>
-        <p>Type: ${pokemon.type}</p>
-        <p>Weight: ${pokemon.weight}</p>
-        <h6>Moves:</h6>
-        <ul>
-            ${pokemon.moves.map(move => `<li>${move}</li>`).join("")}
-        </ul>
-    `;
+function fetchpokemons(number) {
+  for (let i = 1; i <= number; i++) {
+      fetchpokemon(i);
+  
+  }
+}
+/*create target dom*/
+function createpokemon (pokemon) {
+  const card = document.createElement("div");
+  card.classList.add("pokemon-block");
+
+  const spriteContainer = document.createElement("div");
+  spriteContainer.classList.add("img-container");
+
+  const sprite = document.createElement("img");
+  sprite.src = pokemon.sprites.front_default;
+
+  spriteContainer.appendChild(sprite);
+
+  const number = document.createElement("p");
+  number.textContent = `#${pokemon.id.toString().padStart(3, 0)}`;
+
+  const name = document.createElement("p");
+  name.classList.add("name");
+  name.textContent = pokemon.name;
+
+  card.appendChild(spriteContainer);
+  card.appendChild(number);
+  card.appendChild(name);
+
+  pokemoncontainer.appendChild(card);
+
 }
 
-// Event listener for search input
-searchInput.addEventListener("input", () => {
-    const filter = searchInput.value.toLowerCase();
-    const filteredPokemons = pokemonData.filter(pokemon => pokemon.name.toLowerCase().includes(filter));
-    displayPokemonList(filteredPokemons);
-});
+
+fetchpokemons(12);
